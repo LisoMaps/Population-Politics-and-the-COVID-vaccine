@@ -13,3 +13,7 @@ Lower percentages of vaccination are displayed in red and orange, while higher p
 Each county's population class is shown as a function of transparency (alpha), metro counties being 0% transparent, micro counties being 50% transparent, and rural counties being 80% transparent.
 
 County election results appear in the updating info panel as either Democratic or Republican.
+
+---
+
+https://lisomaps.github.io/Population-Politics-and-the-COVID-vaccine/index.html
