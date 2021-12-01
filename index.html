@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Population, Politics, and the COVID Vaccine</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Prompt", sans-serif;
+      }
+
+      p {
+        font-size: 13px;
+      }
+
+      #gradient-text {
+        font-family: "Prompt", sans-serif;
+        color: transparent;
+        font-weight: 400;
+        background-image: linear-gradient(
+          to right,
+          #e41a1c,
+          #ff7f00,
+          #377eb8,
+          #4daf4a
+        );
+        background-size: 100%;
+        -webkit-background-clip: text;
+        -moz-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        -moz-text-fill-color: transparent;
+      }
+
+      #directions {
+        font-family: "Prompt", sans-serif;
+        font-weight: normal;
+      }
+
+      #footnote {
+        font-family: "Prompt", sans-serif;
+        font-weight: lighter;
+        font-size: 9px;
+      }
+
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+        display: inline-block;
+      }
+      #legend {
+        z-index: 1000;
+        padding: 10px;
+        padding-left: 20px;
+        padding-top: 0px;
+        box-shadow: 0 0 10px;
+        font-family: "Prompt", sans-serif;
+        font-size: 16px;
+        color: whitesmoke;
+        position: absolute;
+        top: 100px;
+        left: 10px;
+        background-color: #272727;
+        opacity: 0.97;
+        width: 550px;
+        height: 800px;
+        text-align: left;
+      }
+
+      #county {
+        z-index: 1000;
+        width: 350px;
+        height: 650px;
+        bottom: -120px;
+        left: 120px;
+        position: absolute;
+        background-image: url("./imgs/county_legend.png");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+      }
+
+      .info {
+        z-index: 1000;
+        position: absolute;
+        box-sizing: content-box;
+        right: 10px;
+        top: 10px;
+        padding: 2px 6px;
+        font-family: "Prompt", sans-serif;
+        font-size: 16px;
+        text-align: center;
+        color: whitesmoke;
+        background: #272727;
+        background-color: #272727;
+        opacity: 0.97;
+        box-shadow: 0 0 5px;
+        width: 350px;
+        height: inherit;
+        border-color: #272727;
+        border-style: solid;
+        border-width: thin;
+      }
+
+      .collapsible {
+        font-family: "Prompt", sans-serif;
+        background-color: #272727;
+        color: whitesmoke;
+        cursor: pointer;
+        width: 150px;
+        border: none;
+        text-align: left;
+        outline: none;
+        font-size: 15px;
+        position: absolute;
+        top: 25px;
+        left: 60px;
+        padding: 10px;
+        z-index: 400;
+        overflow-y: hidden;
+      }
+
+      /* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+      .active,
+      .collapsible:hover {
+        color: transparent;
+        font-weight: 300;
+        background-image: linear-gradient(
+          to right,
+          #e41a1c,
+          #ff7f00,
+          #377eb8,
+          #4daf4a
+        );
+        background-size: 100%;
+      }
+
+      /* Style the collapsible content. Note: hidden by default */
+      .content {
+        padding: 0 18px;
+        display: none;
+        overflow-y: hidden;
+        background-color: whitesmoke;
+        max-height: 100%;
+        overflow: hidden;
+        transition: max-height 0.2s ease-out;
+      }
+      .collapsible:after {
+        content: "\02795"; /* Unicode character for "plus" sign (+) */
+        font-size: 13px;
+        color: #272727;
+        float: right;
+        margin-left: 5px;
+      }
+
+      .active:after {
+        content: "\2796"; /* Unicode character for "minus" sign (-) */
+      }
+    </style>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  </head>
+  <body>
+    <div id="map"></div>
+    <button type="button" class="collapsible">Information</button>
+    <div id="legend">
+      <h1 id="gradient-text">
+        Population, Politics, and the COVID Vaccine
+      </h1>
+
+      <p>
+        According to this
+        <a
+          href="https://www.bloomberg.com/news/articles/2021-10-04/local-vaccine-rates-mirror-class-and-density-divides"
+          style="color: #377eb8ff;"
+          >Bloomberg article</a
+        >, political party affiliation has a strong correlation with vaccination
+        rates across metro areas and metro areas with higher vaccination rates
+        are more likely to skew Democratic. <br /><br />
+        As one might guess, this isn't always the case. There are places like
+        Rosebud County, MT, where 76.2% of the population is fully vaxxed
+        despite the polls going red in the 2020 election. There are also places
+        like Fulton County, GA, where the Democratic vote won majority but 30.5%
+        of the population is fully vaxxed. There are many other counties similar
+        to these. <b>See if you can find some!</b> <br /><br />
+        This value-by-alpha map shows the percentage of the population in each
+        county that is fully vaccinated with a qualitative color scheme. Red
+        symbolizing smaller percentages and green symbolizing larger
+        percentages.
+        <br /><br />
+        Each county's population class is shown as a function of transparency
+        (alpha), metro counties being 0% transparent, micro counties being 50%
+        transparent, and rural counties being 80% transparent. County election
+        results appear in the updating info panel as either Democratic or
+        Republican.
+
+        <br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+      </p>
+      <div id="county"></div>
+      <p id="footnote">Vaccine data is as of <b>11/17/2021</b></p>
+      <p id="footnote">
+        The CDC's definition of fully vaccinated is someone who has recieved the
+        second dose of a two-dose vaccine or one dose a of single-dose vaccine.
+      </p>
+    </div>
+    <script src="data/leaflet-providers.js"></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
