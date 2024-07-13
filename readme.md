@@ -15,5 +15,3 @@ Each county's population class is shown as a function of transparency (alpha), m
 County election results appear in the updating info panel as either Democratic or Republican.
 
 ---
-
-https://lisomaps.github.io/Population-Politics-and-the-COVID-vaccine/index.html
